@@ -17,6 +17,7 @@ class _MainformState extends State<Mainform> {
   var santiondate;
   var disburdeddate;
   var _selectedStatus = "Success";
+  var status;
 
   var numberInputFormatters = [
     new FilteringTextInputFormatter.allow(RegExp("[0-9]")),
@@ -42,16 +43,25 @@ class _MainformState extends State<Mainform> {
               ),
             ),
             ListTile(
-              title: const Text('Database'),
+              title: const Text('Form'),
               onTap: () {
-                // Navigator.push(context, MaterialPageRoute(builder: (context)=>Database()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Mainform()));
+              },
+            ),
+          
+            ListTile(
+              title: Text('Filter Data'),
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => FormDatalist()));
               },
             ),
           ],
         ),
       ),
       appBar: AppBar(
-        title: Text('Material App Bar'),
+        title: Text('Form'),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -71,7 +81,7 @@ class _MainformState extends State<Mainform> {
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.black, width: 2),
                       ),
-                      hintText: "Bank Person Name",
+                      hintText: "Name",
                     ),
                   ),
                   DateTimePicker(
@@ -85,6 +95,7 @@ class _MainformState extends State<Mainform> {
                       // print(logindate),
                     },
                   ),
+                  
                   TextFormField(
                     controller: loginamtcontroller,
                     inputFormatters: numberInputFormatters,
@@ -107,6 +118,7 @@ class _MainformState extends State<Mainform> {
                         value: _selectedStatus,
                         items: <String>["Success", "Failed", "Pending"]
                             .map((String value) {
+                              
                           _selectedStatus = value;
                           return DropdownMenuItem<String>(
                             value: value,
@@ -115,7 +127,10 @@ class _MainformState extends State<Mainform> {
                         }).toList(),
                         onChanged: (newValue) {
                           setState(() {
+                            
                             _selectedStatus = newValue.toString();
+                            status = _selectedStatus;
+                        
                           });
                         },
                       ),
@@ -133,7 +148,7 @@ class _MainformState extends State<Mainform> {
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.black, width: 2),
                       ),
-                      hintText: "Bank Person Name",
+                      hintText: "Sanction Amount",
                     ),
                   ),
                   DateTimePicker(
@@ -168,19 +183,24 @@ class _MainformState extends State<Mainform> {
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.black, width: 2),
                       ),
-                      hintText: "Login Amount",
+                      hintText: "Disbursed Amount",
                     ),
+                  ),
+                  SizedBox(
+                    height: 4,
                   ),
                   ElevatedButton(
                       onPressed: () async {
+                            print("select $status");
                         var getname = namecontroller.text;
                         var getlogindate = logindate.toString();
                         var getloginamt = loginamtcontroller.text;
-                        var getstatus = _selectedStatus;
+                        var getstatus = status;
                         var getsanctionamt = sanctionamtcontroller.text;
                         var getsanctiondate = santiondate.toString();
                         var getdisdate = disburdeddate.toString();
                         var getdisbursedamt = disburdedamtcontroller.text;
+                        print("get status $getstatus");
                         FormModel addFormdata = new FormModel(
                             name: getname,
                             logindate: getlogindate,
@@ -192,7 +212,8 @@ class _MainformState extends State<Mainform> {
                             disburdedamt: getdisbursedamt);
                         var box = await Hive.openBox<FormModel>('formdata');
                         box.add(addFormdata);
-                        Navigator.push(context, MaterialPageRoute(builder: (_)=>FormDatalist()));
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (_) => FormDatalist()));
                       },
                       child: Text("Submit"))
                 ],
