@@ -15,7 +15,6 @@ class _FormDatalistState extends State<FormDatalist> {
   List<FormModel>? datalist;
   List<FormModel>? alllist;
   String query = '';
-
   var status = "Success";
   TextEditingController startcontroller = TextEditingController();
   TextEditingController endcontroller = TextEditingController();
@@ -25,6 +24,8 @@ class _FormDatalistState extends State<FormDatalist> {
   Icon serch = Icon(Icons.search_sharp);
   bool isserch = true;
   bool isok = false;
+  late DateTime firstdt;
+  late DateTime enddt;
 
   void getData() async {
     final box = await Hive.openBox<FormModel>('formdata');
@@ -34,9 +35,22 @@ class _FormDatalistState extends State<FormDatalist> {
     });
   }
 
+  List getDaysInBeteween(DateTime startDate, DateTime endDate) {
+    List days = [];
+    List totaldays = [];
+    for (int i = 0; i <= endDate.difference(startDate).inDays; i++) {
+      days.add(DateTime(startDate.year, startDate.month, startDate.day + i));
+      var dy = days[i].toString();
+      var day = dy.replaceAll("00:00:00.000", "");
+      totaldays.add(day.trim());
+    }
+    return totaldays;
+  }
+
   @override
   void initState() {
     getData();
+
     super.initState();
   }
 
@@ -46,7 +60,7 @@ class _FormDatalistState extends State<FormDatalist> {
       final data = alllist!.where((formdata) {
         final name = formdata.name.toLowerCase();
         final searchstatus = formdata.status.toLowerCase();
-        return name.contains(query) || searchstatus.contains(query) ;
+        return name.contains(query) || searchstatus.contains(query);
       }).toList();
       setState(() {
         this.query = query;
@@ -103,11 +117,13 @@ class _FormDatalistState extends State<FormDatalist> {
           onPressed: () => Navigator.pop(context),
           child: Text('Cancal'),
         ),
-        FlatButton(
-          textColor: Colors.amber,
+        ElevatedButton(
           onPressed: () {
             isok = true;
-            setState(() {
+            firstdt = DateTime.parse(startdate!);
+            enddt = DateTime.parse(enddate!);
+            var different = enddt.difference(firstdt).inDays;
+             setState(() {
               selectdate = Text("$startdate - $enddate");
               Navigator.pop(context);
             });
@@ -244,8 +260,24 @@ class _FormDatalistState extends State<FormDatalist> {
                   ],
                 ),
               ),
+              ElevatedButton(
+                  onPressed: () {
+                    List alldays = getDaysInBeteween(firstdt, enddt);
+     
+                    final data = alllist!.where((formdata) {
+                      final logindt = formdata.logindate.toLowerCase();
+                      
+                      return alldays.contains(logindt);
+                    }).toList();
+
+                    setState(() {
+                      this.query = query;
+                      this.datalist = data;
+                    });
+                  },
+                  child: Text("Search")),
               Container(
-                height: MediaQuery.of(context).size.height * 0.70,
+                height: MediaQuery.of(context).size.height * 0.65,
                 child: ListView.builder(
                   shrinkWrap: true,
                   itemCount: datalist!.length,
