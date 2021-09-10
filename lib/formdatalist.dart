@@ -14,6 +14,7 @@ class FormDatalist extends StatefulWidget {
 class _FormDatalistState extends State<FormDatalist> {
   List<FormModel> datalist = [];
   List<FormModel>? alllist;
+  String dateerror = "";
   String query = '';
   var status = "Success";
   TextEditingController startcontroller = TextEditingController();
@@ -88,6 +89,7 @@ class _FormDatalistState extends State<FormDatalist> {
                 DateTimePicker(
                   timeLabelText: "Choose Start Date",
                   initialValue: '',
+                  errorInvalidText: dateerror,
                   firstDate: DateTime(1950),
                   lastDate: DateTime((DateTime.now().year) + 1),
                   dateLabelText: 'Choose Start Date',
@@ -98,6 +100,7 @@ class _FormDatalistState extends State<FormDatalist> {
                 DateTimePicker(
                   timeLabelText: "Choose End Date",
                   initialValue: '',
+                  errorInvalidText: dateerror,
                   firstDate: DateTime(1950),
                   lastDate: DateTime((DateTime.now().year) + 1),
                   dateLabelText: 'Choose End Date',
@@ -120,11 +123,28 @@ class _FormDatalistState extends State<FormDatalist> {
             isok = true;
             firstdt = DateTime.parse(startdate!);
             enddt = DateTime.parse(enddate!);
+
+
             var different = enddt.difference(firstdt).inDays;
-            setState(() {
-              selectdate = Text("$startdate - $enddate");
-              Navigator.pop(context);
-            });
+            final now = DateTime.now();
+            final dt = (now.toString()).replaceRange(10, 26, "");
+          DateTime nowdate =  DateTime.parse(dt);
+
+             var curentDiff = firstdt.difference(DateTime.now()).inDays;
+             var lastdiff = enddt.difference(DateTime.now()).inDays;
+            
+
+            if (different > 0 && curentDiff < 0 && lastdiff <= 0) {
+              setState(() {
+                selectdate = Text("$startdate - $enddate");
+                Navigator.pop(context);
+              });
+            } else {
+              setState(() {
+                final snackBar = SnackBar(content: Text('Date Range Error'));
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              });
+            }
           },
           child: Text('Ok'),
         ),
@@ -146,14 +166,14 @@ class _FormDatalistState extends State<FormDatalist> {
                   controller: startcontroller,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    labelText: "Enter minimume amount",
+                    labelText: "Enter minimum amount",
                     focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.blue, width: 2),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.black, width: 2),
                     ),
-                    hintText: "Enter minimume amount",
+                    hintText: "Enter minimum amount",
                   ),
                 ),
                 SizedBox(
@@ -163,14 +183,14 @@ class _FormDatalistState extends State<FormDatalist> {
                   controller: endcontroller,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    labelText: "Enter Maximume amount",
+                    labelText: "Enter Maximum amount",
                     focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.blue, width: 2),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.black, width: 2),
                     ),
-                    hintText: "Enter Maximume amount",
+                    hintText: "Enter Maximum amount",
                   ),
                 ),
               ],
@@ -271,8 +291,8 @@ class _FormDatalistState extends State<FormDatalist> {
                       final amt = (int.parse(amtstring));
                       final logindt = formdata.logindate.toLowerCase();
                       final allstatus = formdata.status;
-                      return alldays.contains(logindt) ||
-                          allamtlist.contains(amt) ||
+                      return alldays.contains(logindt) &&
+                          allamtlist.contains(amt) &&
                           allstatus.contains(getstatus);
                     }).toList();
 
