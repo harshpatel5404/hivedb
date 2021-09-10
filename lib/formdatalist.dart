@@ -12,7 +12,7 @@ class FormDatalist extends StatefulWidget {
 }
 
 class _FormDatalistState extends State<FormDatalist> {
-  List<FormModel>? datalist;
+  List<FormModel> datalist = [];
   List<FormModel>? alllist;
   String query = '';
   var status = "Success";
@@ -26,7 +26,7 @@ class _FormDatalistState extends State<FormDatalist> {
   bool isok = false;
   late DateTime firstdt;
   late DateTime enddt;
-
+  var getstatus;
   void getData() async {
     final box = await Hive.openBox<FormModel>('formdata');
     setState(() {
@@ -50,7 +50,6 @@ class _FormDatalistState extends State<FormDatalist> {
   @override
   void initState() {
     getData();
-
     super.initState();
   }
 
@@ -112,8 +111,7 @@ class _FormDatalistState extends State<FormDatalist> {
         ),
       ),
       actions: [
-        FlatButton(
-          textColor: Colors.amber,
+        ElevatedButton(
           onPressed: () => Navigator.pop(context),
           child: Text('Cancal'),
         ),
@@ -181,13 +179,11 @@ class _FormDatalistState extends State<FormDatalist> {
         ),
       ),
       actions: [
-        FlatButton(
-          textColor: Colors.amber,
+        ElevatedButton(
           onPressed: () => Navigator.pop(context),
           child: Text('Cancal'),
         ),
-        FlatButton(
-          textColor: Colors.amber,
+        ElevatedButton(
           onPressed: () {
             isok = true;
             Navigator.pop(context);
@@ -229,6 +225,7 @@ class _FormDatalistState extends State<FormDatalist> {
                           onChanged: (newValue) {
                             setState(() {
                               status = newValue.toString();
+                              getstatus = status;
                             });
                           },
                         ),
@@ -262,23 +259,21 @@ class _FormDatalistState extends State<FormDatalist> {
                   onPressed: () {
                     var minamt = int.parse(startcontroller.text);
                     var maxamt = int.parse(endcontroller.text);
-                    print("min $minamt");
-                    print("min $maxamt");
-                    List allamtlist = List<int>.generate(maxamt-minamt, (int index) => index + minamt);
 
-                    // for (var i = minamt; i < maxamt; i++) {
-                    //   allamtlist.add(minamt + 1);
-                    // }
-                    // print("all $allamtlist");
-                    // print(amount);
-
+                    List<int> allamtlist = [];
+                    for (var i = minamt; i < maxamt; i++) {
+                      allamtlist.add(i + 1);
+                    }
                     List alldays = getDaysInBeteween(firstdt, enddt);
+
                     final data = alllist!.where((formdata) {
-                      final amt = formdata.loginamt.toLowerCase();
-                      print(amt);
+                      final amtstring = formdata.loginamt.toLowerCase();
+                      final amt = (int.parse(amtstring));
                       final logindt = formdata.logindate.toLowerCase();
-                      return alldays.contains(logindt) &&
-                          allamtlist.contains(amt);
+                      final allstatus = formdata.status;
+                      return alldays.contains(logindt) ||
+                          allamtlist.contains(amt) ||
+                          allstatus.contains(getstatus);
                     }).toList();
 
                     setState(() {
@@ -291,9 +286,9 @@ class _FormDatalistState extends State<FormDatalist> {
                 height: MediaQuery.of(context).size.height * 0.65,
                 child: ListView.builder(
                   shrinkWrap: true,
-                  itemCount: datalist!.length,
+                  itemCount: datalist.length,
                   itemBuilder: (context, index) {
-                    FormModel getdata = datalist![index];
+                    FormModel getdata = datalist[index];
                     var name = getdata.name;
                     var amt = getdata.loginamt;
                     var stats = getdata.status;
@@ -303,7 +298,7 @@ class _FormDatalistState extends State<FormDatalist> {
                         final box = await Hive.openBox<FormModel>('formdata');
                         box.deleteAt(index);
                         setState(() {
-                          datalist!.removeAt(index);
+                          datalist.removeAt(index);
                           alllist = datalist;
                         });
                       },
