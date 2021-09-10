@@ -123,7 +123,7 @@ class _FormDatalistState extends State<FormDatalist> {
             firstdt = DateTime.parse(startdate!);
             enddt = DateTime.parse(enddate!);
             var different = enddt.difference(firstdt).inDays;
-             setState(() {
+            setState(() {
               selectdate = Text("$startdate - $enddate");
               Navigator.pop(context);
             });
@@ -195,8 +195,6 @@ class _FormDatalistState extends State<FormDatalist> {
               selectamt =
                   Text(startcontroller.text + " - " + endcontroller.text);
             });
-            startcontroller.clear();
-            endcontroller.clear();
           },
           child: Text('Ok'),
         ),
@@ -262,12 +260,25 @@ class _FormDatalistState extends State<FormDatalist> {
               ),
               ElevatedButton(
                   onPressed: () {
+                    var minamt = int.parse(startcontroller.text);
+                    var maxamt = int.parse(endcontroller.text);
+                    print("min $minamt");
+                    print("min $maxamt");
+                    List allamtlist = List<int>.generate(maxamt-minamt, (int index) => index + minamt);
+
+                    // for (var i = minamt; i < maxamt; i++) {
+                    //   allamtlist.add(minamt + 1);
+                    // }
+                    // print("all $allamtlist");
+                    // print(amount);
+
                     List alldays = getDaysInBeteween(firstdt, enddt);
-     
                     final data = alllist!.where((formdata) {
+                      final amt = formdata.loginamt.toLowerCase();
+                      print(amt);
                       final logindt = formdata.logindate.toLowerCase();
-                      
-                      return alldays.contains(logindt);
+                      return alldays.contains(logindt) &&
+                          allamtlist.contains(amt);
                     }).toList();
 
                     setState(() {
