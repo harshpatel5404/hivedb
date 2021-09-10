@@ -126,9 +126,7 @@ class _FormDatalistState extends State<FormDatalist> {
 
 
             var different = enddt.difference(firstdt).inDays;
-            final now = DateTime.now();
-            final dt = (now.toString()).replaceRange(10, 26, "");
-          DateTime nowdate =  DateTime.parse(dt);
+         
 
              var curentDiff = firstdt.difference(DateTime.now()).inDays;
              var lastdiff = enddt.difference(DateTime.now()).inDays;
